@@ -19,6 +19,7 @@ module.exports = {
             }
         ]
     },
+    // without resolve webpack gave errors ???
     resolve: {
         extensions: ["", ".js", ".jsx"]
     },
