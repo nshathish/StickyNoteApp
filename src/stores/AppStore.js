@@ -2,33 +2,58 @@ import {EventEmitter} from "fbemitter";
 import _ from "underscore";
 import ActionConstants from "../constants/AppConstants";
 import dispatcher from "../dispatchers/AppDispatcher";
+import $ from "jquery";
 
 const CHANGE_EVENT = "CHANGE_EVENT";
+const STORE_API_URL = "https://api.myjson.com/bins/1dd6yj"
 
 let _emitter = new EventEmitter();
-let _noteStore = [
-    {id: 1, note: "Call Bill", isEditing: false},
-    {id: 2, note: "Email Lisa", isEditing: false},
-    {id: 3, note: "Make Dentist appointment", isEditing: false},
-    {id: 4, note: "Send Proposal", isEditing: false}
-];
+let _noteStore = [];
+
+function _fetchFromJsonStore() {
+
+    $.get(STORE_API_URL, res => {
+        _noteStore = res.notes;
+        _emitter.emit(CHANGE_EVENT);
+    }).fail(err => {
+        console.log(err);
+    });
+}
+
+function _updateJsonStore() {
+    $.ajax({
+        url: STORE_API_URL,
+        method: "PUT",
+        data: JSON.stringify({notes: _noteStore}),
+        contentType:"application/json; charset=utf-8",
+        dataType:"json",
+        success: function (data){
+            console.log(data);
+        },
+        error: function (jqXhr, status, err) {
+            console.log(err);
+        }
+    });
+}
 
 function _addNote(note) {
     _noteStore.push(note);
 }
 
 function _updateNote(note, id) {
-    let noteToUpdate = _noteStore.map(n => {
-        return n.id === id;
-    });
+    let notesToUpdate = _noteStore.filter(n => n.id === id);
+    notesToUpdate[0].note = note;
+    notesToUpdate[0].isEditing = false;
 
-    noteToUpdate.note = note;
+    _updateJsonStore();
 }
 
 function _deleteNote(id) {
     _noteStore = _.without(_noteStore, _.findWhere(_noteStore, {
         id
     }));
+
+    _updateJsonStore();
 }
 
 
@@ -46,7 +71,13 @@ let AppStore = {
 };
 
 dispatcher.DispatchToken = dispatcher.register(action => {
+    let isEmitChange = true;
+
     switch (action.type) {
+        case ActionConstants.INIT:
+            isEmitChange = false;
+            _fetchFromJsonStore();
+            break;
         case ActionConstants.ADD:
             _addNote(action.note);
             break;
@@ -58,7 +89,7 @@ dispatcher.DispatchToken = dispatcher.register(action => {
             break;
     }
 
-    _emitter.emit(CHANGE_EVENT);
+    if(isEmitChange) _emitter.emit(CHANGE_EVENT);
 });
 
 export default AppStore;
