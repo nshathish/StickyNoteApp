@@ -5,20 +5,12 @@ import dispatcher from "../dispatchers/AppDispatcher";
 import $ from "jquery";
 
 const CHANGE_EVENT = "CHANGE_EVENT";
-<<<<<<< HEAD
 const STORE_API_URL = "https://api.myjson.com/bins/1dd6yj";
-=======
-const STORE_API_URL = "https://api.myjson.com/bins/1dd6yj"
->>>>>>> origin/master
 
 let _emitter = new EventEmitter();
 let _noteStore = [];
 
 function _fetchFromJsonStore() {
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
     $.get(STORE_API_URL, res => {
         _noteStore = res.notes;
         _emitter.emit(CHANGE_EVENT);
@@ -32,15 +24,9 @@ function _updateJsonStore() {
         url: STORE_API_URL,
         method: "PUT",
         data: JSON.stringify({notes: _noteStore}),
-<<<<<<< HEAD
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (data) {
-=======
         contentType:"application/json; charset=utf-8",
         dataType:"json",
         success: function (data){
->>>>>>> origin/master
             console.log(data);
         },
         error: function (jqXhr, status, err) {
@@ -48,10 +34,6 @@ function _updateJsonStore() {
         }
     });
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
 
 function _addNote(note) {
     _noteStore.push(note);
@@ -59,28 +41,19 @@ function _addNote(note) {
 
 function _updateNote(note, id) {
     let notesToUpdate = _noteStore.filter(n => n.id === id);
-<<<<<<< HEAD
+
     if(notesToUpdate.length > 1) {
         notesToUpdate[0].note = note;
         notesToUpdate[0].isEditing = false;
         _updateJsonStore();
     }
-=======
-    notesToUpdate[0].note = note;
-    notesToUpdate[0].isEditing = false;
-
     _updateJsonStore();
->>>>>>> origin/master
 }
 
 function _deleteNote(id) {
     _noteStore = _.without(_noteStore, _.findWhere(_noteStore, {
         id
     }));
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
     _updateJsonStore();
 }
 
@@ -103,13 +76,8 @@ dispatcher.DispatchToken = dispatcher.register(action => {
 
     switch (action.type) {
         case ActionConstants.INIT:
-<<<<<<< HEAD
             _fetchFromJsonStore();
             isEmitChange = false;
-=======
-            isEmitChange = false;
-            _fetchFromJsonStore();
->>>>>>> origin/master
             break;
         case ActionConstants.ADD:
             _addNote(action.note);
