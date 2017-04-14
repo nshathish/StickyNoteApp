@@ -3,7 +3,7 @@ A sticky note app idea derived from the course Lynda.com-Up and Running with Rea
 
 Todo
 * ~Save the notes to a persistent storage (maybe an online key-value storage)~
-* drag and drop feature
+* ~drag and drop feature~
 * when new note is added focus cursor on it
 * Shuffle the notes
 
