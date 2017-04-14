@@ -19,10 +19,14 @@ module.exports = {
             }
         ]
     },
+    // without resolve webpack gave errors ???
     resolve: {
-        extensions: ["", ".js", ".jsx"]
+        extensions: ["", ".js", ".jsx"],
+        alias: {
+            "jquery-ui": "jquery-ui-dist/jquery-ui.js"
+        }
     },
-    devServer: {        
+    devServer: {
         inline: true,
         progress: true,
         historyApiFallback: true,

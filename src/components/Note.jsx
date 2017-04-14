@@ -1,5 +1,7 @@
 import React from "react";
 import AppActions from "../actions/AppActions";
+import $ from "jquery";
+import "jquery-ui";
 
 export default class Note extends React.Component {
 
@@ -26,9 +28,9 @@ export default class Note extends React.Component {
         };
     }
 
-    /*componentWillReceiveProps(nextProps) {
-        this.setState({note: nextProps.note });
-    }*/
+    componentDidMount() {
+        $(this.noteEl).draggable();
+    }
 
     edit() {
         this.setState({editing: true});
@@ -55,7 +57,7 @@ export default class Note extends React.Component {
 
     renderDisplay() {
         return (
-            <div className="note" style={this.style}>
+            <div className="note" style={this.style} ref={(div) => { this.noteEl = div; }}>
                 <p>{this.state.note}</p>
                 <span>
                     <button className="btn btn-primary glyphicon glyphicon-pencil"

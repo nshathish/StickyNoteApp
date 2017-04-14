@@ -17,6 +17,7 @@ export default class Board extends React.Component {
 
     componentWillMount() {
         AppStore.addListener(this._changeEvent);
+        AppActions.initialize();
     }
 
     newNote() {
