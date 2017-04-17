@@ -40,7 +40,7 @@ div.note {
 }
 
 div.note:active {
-    cursor: -webkit-grabbing;
+    cursor: hand;
 }
 
 div.note p {
@@ -71,6 +71,12 @@ div.note > textarea {
 }
 
 .glyphicon-plus {
+    position: fixed;
+    top: 10px;
+    right: 50px;
+}
+
+.glyphicon-refresh {
     position: fixed;
     top: 10px;
     right: 10px;

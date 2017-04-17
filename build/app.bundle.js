@@ -21877,6 +21877,7 @@
 	
 	        _this._changeEvent = _this._changeEvent.bind(_this);
 	        _this.newNote = _this.newNote.bind(_this);
+	        _this.reshuffle = _this.reshuffle.bind(_this);
 	        return _this;
 	    }
 	
@@ -21893,6 +21894,13 @@
 	                id: _AppStore2.default.getNextId(),
 	                note: "",
 	                isEditing: true
+	            });
+	        }
+	    }, {
+	        key: "reshuffle",
+	        value: function reshuffle() {
+	            this.setState({
+	                notes: _AppStore2.default.getNotes()
 	            });
 	        }
 	    }, {
@@ -21915,7 +21923,9 @@
 	                { className: "board" },
 	                notes,
 	                _react2.default.createElement("button", { className: "btn btn-success btn-sm glyphicon glyphicon-plus",
-	                    onClick: this.newNote })
+	                    onClick: this.newNote }),
+	                _react2.default.createElement("button", { className: "btn btn-primary btn-sm glyphicon glyphicon-refresh",
+	                    onClick: this.reshuffle })
 	            );
 	        }
 	    }]);
@@ -21983,16 +21993,29 @@
 	    _createClass(Note, [{
 	        key: "componentWillMount",
 	        value: function componentWillMount() {
-	            this.style = {
-	                right: this._randomBetween(0, window.innerWidth - 150) + "px",
-	                top: this._randomBetween(0, window.innerHeight - 150) + "px",
-	                transform: "rotate(" + this._randomBetween(-15, 15) + "deg)"
-	            };
+	            this.style = {};
+	            if (this.props.isEditing) {
+	                this.style = {
+	                    left: 10 + "px",
+	                    top: 10 + "px"
+	                };
+	            } else {
+	                this.style = {
+	                    right: this._randomBetween(0, window.innerWidth - 150) + "px",
+	                    top: this._randomBetween(0, window.innerHeight - 150) + "px",
+	                    transform: "rotate(" + this._randomBetween(-15, 15) + "deg)"
+	                };
+	            }
 	        }
 	    }, {
 	        key: "componentDidMount",
 	        value: function componentDidMount() {
-	            (0, _jquery2.default)(this.noteEl).draggable();
+	            var el = (0, _jquery2.default)(this.noteEl);
+	
+	            el.draggable();
+	            if (this.props.isEditing) {
+	                (0, _jquery2.default)("textarea", el).focus();
+	            }
 	        }
 	    }, {
 	        key: "edit",
@@ -22050,9 +22073,13 @@
 	    }, {
 	        key: "renderForm",
 	        value: function renderForm() {
+	            var _this3 = this;
+	
 	            return _react2.default.createElement(
 	                "div",
-	                { className: "note", style: this.style },
+	                { className: "note", style: this.style, ref: function ref(div) {
+	                        _this3.noteEl = div;
+	                    } },
 	                _react2.default.createElement("textarea", { className: "form-control", onChange: this.onNoteChange, defaultValue: this.state.note }),
 	                _react2.default.createElement("button", { className: "btn btn-success btn-sm glyphicon glyphicon-floppy-disk",
 	                    onClick: this.save })
@@ -51409,28 +51436,50 @@
 	var _noteStore = [];
 	
 	function _fetchFromJsonStore() {
-	    _jquery2.default.get(STORE_API_URL, function (res) {
+	    // using Fetch
+	    fetch(STORE_API_URL).then(function (res) {
+	        return res.json();
+	    }).then(function (res) {
 	        _noteStore = res.notes;
 	        _emitter.emit(CHANGE_EVENT);
-	    }).fail(function (err) {
-	        console.log(err);
+	    }).catch(function (err) {
+	        console.log("Fetch From Data Store", err);
 	    });
+	
+	    /*$.get(STORE_API_URL, res => {
+	        _noteStore = res.notes;
+	        _emitter.emit(CHANGE_EVENT);
+	    }).fail(err => {
+	        console.log(err);
+	    });*/
 	}
 	
 	function _updateJsonStore() {
-	    _jquery2.default.ajax({
+	    // using Fetch
+	    fetch(STORE_API_URL, {
+	        method: "PUT",
+	        mode: "cors",
+	        headers: new Headers({
+	            "Content-Type": "application/json"
+	        }),
+	        body: JSON.stringify({ notes: _noteStore })
+	    }).catch(function (err) {
+	        console.log("Update Json Store", err);
+	    });
+	
+	    /*$.ajax({
 	        url: STORE_API_URL,
 	        method: "PUT",
-	        data: JSON.stringify({ notes: _noteStore }),
-	        contentType: "application/json; charset=utf-8",
-	        dataType: "json",
-	        success: function success(data) {
+	        data: JSON.stringify({notes: _noteStore}),
+	        contentType:"application/json; charset=utf-8",
+	        dataType:"json",
+	        success: function (data){
 	            console.log(data);
 	        },
-	        error: function error(jqXhr, status, err) {
+	        error: function (jqXhr, status, err) {
 	            console.log(err);
 	        }
-	    });
+	    });*/
 	}
 	
 	function _addNote(note) {
@@ -51441,11 +51490,17 @@
 	    var notesToUpdate = _noteStore.filter(function (n) {
 	        return n.id === id;
 	    });
-	    if (notesToUpdate.length > 1) {
+	
+	    if (notesToUpdate.length == 1) {
 	        notesToUpdate[0].note = note;
 	        notesToUpdate[0].isEditing = false;
-	        _updateJsonStore();
 	    }
+	
+	    _noteStore.forEach(function (note) {
+	        note.isEditing = false;
+	    });
+	
+	    _updateJsonStore();
 	}
 	
 	function _deleteNote(id) {

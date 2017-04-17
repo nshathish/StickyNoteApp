@@ -21,15 +21,29 @@ export default class Note extends React.Component {
     }
 
     componentWillMount() {
-        this.style = {
-            right: this._randomBetween(0, window.innerWidth - 150) + "px",
-            top: this._randomBetween(0, window.innerHeight - 150) + "px",
-            transform: "rotate(" + this._randomBetween(-15, 15) +"deg)"
-        };
+        this.style = {};
+        if(this.props.isEditing) {
+            this.style = {
+                left: 10 + "px",
+                top: 10 + "px"
+            };
+        } else {
+            this.style = {
+                right: this._randomBetween(0, window.innerWidth - 150) + "px",
+                top: this._randomBetween(0, window.innerHeight - 150) + "px",
+                transform: "rotate(" + this._randomBetween(-15, 15) +"deg)"
+            };
+        }
+
     }
 
     componentDidMount() {
-        $(this.noteEl).draggable();
+        let el = $(this.noteEl);
+
+        el.draggable();
+        if(this.props.isEditing) {
+            $("textarea", el).focus();
+        }
     }
 
     edit() {
@@ -71,7 +85,7 @@ export default class Note extends React.Component {
 
     renderForm() {
         return (
-            <div className="note" style={this.style}>
+            <div className="note" style={this.style} ref={(div) => { this.noteEl = div; }}>
                 <textarea className="form-control" onChange={this.onNoteChange} defaultValue={this.state.note}></textarea>
                 <button className="btn btn-success btn-sm glyphicon glyphicon-floppy-disk"
                         onClick={this.save} />

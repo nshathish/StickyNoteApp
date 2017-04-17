@@ -11,16 +11,43 @@ let _emitter = new EventEmitter();
 let _noteStore = [];
 
 function _fetchFromJsonStore() {
-    $.get(STORE_API_URL, res => {
+    // using Fetch
+    fetch(STORE_API_URL)
+        .then(res => {
+            return res.json();
+        })
+        .then(res => {
+            _noteStore = res.notes;
+            _emitter.emit(CHANGE_EVENT);
+        })
+        .catch(err => {
+            console.log("Fetch From Data Store", err);
+        });
+
+
+    /*$.get(STORE_API_URL, res => {
         _noteStore = res.notes;
         _emitter.emit(CHANGE_EVENT);
     }).fail(err => {
         console.log(err);
-    });
+    });*/
 }
 
 function _updateJsonStore() {
-    $.ajax({
+    // using Fetch
+    fetch(STORE_API_URL, {
+        method: "PUT",
+        mode: "cors",
+        headers: new Headers({
+            "Content-Type": "application/json"
+        }),
+        body: JSON.stringify({notes: _noteStore})
+    }).catch(err => {
+        console.log("Update Json Store", err);
+    });
+
+
+    /*$.ajax({
         url: STORE_API_URL,
         method: "PUT",
         data: JSON.stringify({notes: _noteStore}),
@@ -32,7 +59,7 @@ function _updateJsonStore() {
         error: function (jqXhr, status, err) {
             console.log(err);
         }
-    });
+    });*/
 }
 
 function _addNote(note) {
@@ -42,11 +69,15 @@ function _addNote(note) {
 function _updateNote(note, id) {
     let notesToUpdate = _noteStore.filter(n => n.id === id);
 
-    if(notesToUpdate.length > 1) {
+    if(notesToUpdate.length == 1) {
         notesToUpdate[0].note = note;
         notesToUpdate[0].isEditing = false;
-        _updateJsonStore();
     }
+
+    _noteStore.forEach(note => {
+        note.isEditing = false;
+    });
+
     _updateJsonStore();
 }
 
